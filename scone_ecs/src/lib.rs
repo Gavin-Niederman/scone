@@ -1,6 +1,7 @@
 pub mod entity;
 pub mod component;
-pub mod system;
+pub mod resource;
+pub mod world;
 
 #[derive(Debug)]
 pub enum EcsError {
