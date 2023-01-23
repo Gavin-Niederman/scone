@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 saunter = "0.1.3"
 scone_ecs = { path = "../scone_ecs" }
+winit = "0.27.5"

@@ -2,7 +2,7 @@ use std::any::Any;
 use crate::{component::Component, EcsError};
 
 pub struct Entity {
-    components: Vec<Box<dyn Any>>,
+    components: Vec<Box<dyn Any + Send>>,
 }
 impl Entity {
     pub fn new() -> Self {
@@ -11,7 +11,7 @@ impl Entity {
         }
     }
 
-    pub fn add_component<T: Component + 'static>(&mut self, component: T) {
+    pub fn add_component<T: Component + 'static + Send>(&mut self, component: T) {
         self.components.push(Box::new(component));
     }
 
