@@ -10,7 +10,6 @@
         pkgs = nixpkgs.legacyPackages.x86_64-linux; 
       in pkgs.mkShell {
         buildInputs = [
-          pkgs.rustup
           pkgs.cmake
           pkgs.pkg-config
           pkgs.fontconfig
