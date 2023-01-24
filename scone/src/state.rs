@@ -3,7 +3,6 @@ pub struct State {
 }
 impl saunter::listener::Listener for State {
     type TickType = Tick;
-
     type EventType = winit::event::Event<'static, ()>;
 
     fn tick(

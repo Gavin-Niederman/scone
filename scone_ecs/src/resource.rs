@@ -1,6 +1,3 @@
-pub struct Resouce<T: ResourceType + ?Sized> {
+pub struct Resouce<T: Send + ?Sized> {
     pub data: Box<T>,
 }
-
-pub trait ResourceType: Send {}
-impl<T: ?Sized + Send> ResourceType for T {}
