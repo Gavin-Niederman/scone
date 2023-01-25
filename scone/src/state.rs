@@ -1,28 +1,27 @@
-pub struct State {
-    pub ecs: scone_ecs::world::World,
-}
-impl saunter::listener::Listener for State {
-    type TickType = Tick;
-    type EventType = winit::event::Event<'static, ()>;
+use crate::scene::Scene;
 
-    fn tick(
-        &mut self,
-        dt: f32,
-        events: Vec<saunter::event::Event<Self::EventType>>,
-        time: std::time::Instant,
-    ) -> Result<Self::TickType, saunter::error::SaunterError> {
-        todo!()
-    }
+pub struct State<'a> {
+    scenes: &'a [Scene],
 }
 
-#[derive(Debug, Clone, Copy)]
-pub struct Tick {}
-impl saunter::tick::Tick for Tick {
-    fn lerp(&self, b: &Self, t: f32) -> Result<Self, saunter::math::MathError> {
-        todo!()
+pub struct StateBuilder {
+    scenes: Vec<Scene>,
+}
+impl StateBuilder {
+    pub fn new() -> Self {
+        Self {
+            scenes: Vec::new(),
+        }
     }
 
-    fn get_time(&self) -> &std::time::Instant {
-        todo!()
+    pub fn with_scene(mut self, scene: Scene) -> Self {
+        self.scenes.push(scene);
+        self
+    }
+
+    pub fn build<'a>(self) -> State<'a> {
+        State {
+            scenes: Box::leak(self.scenes.into_boxed_slice()),
+        }
     }
 }
