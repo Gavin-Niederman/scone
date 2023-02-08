@@ -1,16 +1,33 @@
-use crate::scene::Scene;
+use crate::scene::{Scene, Tick};
 
-pub struct State<'a> {
-    scenes: &'a [Scene],
+pub struct State {
+    scenes: Vec<Scene>,
+    current_scene: usize,
+}
+impl saunter::listener::Listener for State {
+    type Tick = Tick;
+    type Event = winit::event::Event<'static, ()>;
+
+    fn tick(
+        &mut self,
+        dt: f32,
+        events: Vec<saunter::event::Event<Self::Event>>,
+        time: std::time::Instant,
+    ) -> Result<Self::Tick, saunter::error::SaunterError> {
+        println!("ticked");
+        Ok(Tick {})
+    }
 }
 
 pub struct StateBuilder {
     scenes: Vec<Scene>,
+    current_scene: Option<usize>,
 }
 impl StateBuilder {
     pub fn new() -> Self {
         Self {
             scenes: Vec::new(),
+            current_scene: None,
         }
     }
 
@@ -19,9 +36,15 @@ impl StateBuilder {
         self
     }
 
-    pub fn build<'a>(self) -> State<'a> {
+    pub fn with_default_scene(mut self, current_scene: usize) -> Self {
+        self.current_scene = Some(current_scene);
+        self
+    }
+
+    pub fn build(self) -> State {
         State {
-            scenes: Box::leak(self.scenes.into_boxed_slice()),
+            scenes: self.scenes,
+            current_scene: self.current_scene.unwrap_or(0),
         }
     }
 }

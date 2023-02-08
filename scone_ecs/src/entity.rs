@@ -2,7 +2,7 @@ use crate::{component::Component, EcsError};
 use std::any::Any;
 
 pub struct Entity {
-    components: Vec<Box<dyn Any + Send>>,
+    components: Vec<Box<dyn Any + Send + Sync>>,
 }
 impl Entity {
     pub fn new() -> Self {
@@ -11,11 +11,13 @@ impl Entity {
         }
     }
 
-    pub fn add_component<T: Component + 'static + Send>(&mut self, component: T) {
+    pub fn add_component<T: Component + 'static + Send + Sync>(&mut self, component: T) {
         self.components.push(Box::new(component));
     }
 
-    pub fn get_component<T: Component + 'static>(&mut self) -> Result<&mut T, EcsError> {
+    pub fn get_component<T: Component + 'static + Send + Sync>(
+        &mut self,
+    ) -> Result<&mut T, EcsError> {
         if let Some(component) = self
             .components
             .iter_mut()

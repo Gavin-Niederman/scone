@@ -1,22 +1,17 @@
-pub struct Scene {
-    pub world: scone_ecs::world::World<<Self as saunter::listener::Listener>::EventType>,
-}
-impl saunter::listener::Listener for Scene {
-    type TickType = Tick;
-    type EventType = winit::event::Event<'static, ()>;
+use crate::state::State;
+use saunter::listener::Listener;
 
-    fn tick(
-        &mut self,
-        dt: f32,
-        events: Vec<saunter::event::Event<Self::EventType>>,
-        time: std::time::Instant,
-    ) -> Result<Self::TickType, saunter::error::SaunterError> {
-        todo!()
-    }
+pub struct Scene {
+    pub world: scone_ecs::world::World<<State as Listener>::Event>,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Tick {}
+impl Tick {
+    pub fn first() -> Self {
+        Self {}
+    }
+}
 impl saunter::tick::Tick for Tick {
     fn lerp(&self, b: &Self, t: f32) -> Result<Self, saunter::math::MathError> {
         todo!()

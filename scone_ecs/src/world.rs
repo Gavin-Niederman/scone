@@ -3,7 +3,7 @@ use std::marker::PhantomData;
 
 pub struct World<T: Send> {
     entities: Vec<Entity>,
-    resources: Vec<Resouce<dyn Send>>,
+    resources: Vec<Resouce<dyn Send + Sync>>,
     phantom_data: PhantomData<T>,
 }
 
