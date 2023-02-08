@@ -1,7 +1,15 @@
 [package]
-name = "scone_ecs"
+name = "scone-ecs"
 version = "0.1.0"
 edition = "2021"
+authors = ["Gavin Niederman <gavinniederman@gmail.com>"]
+description = "The ecs used in Scone"
+license = "MIT"
+repository = "https://github.com/Gavin-Niederman/scone"
+keywords = [
+    "ecs",
+    "scone",
+]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
