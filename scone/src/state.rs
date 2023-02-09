@@ -14,7 +14,7 @@ impl saunter::listener::Listener for State {
         events: Vec<saunter::event::Event<Self::Event>>,
         time: std::time::Instant,
     ) -> Result<Self::Tick, saunter::error::SaunterError> {
-        println!("ticked");
+        log::info!("ticked");
         Ok(Tick {})
     }
 }
