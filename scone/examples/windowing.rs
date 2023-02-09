@@ -8,7 +8,5 @@ fn main() {
 
     let state = state_builder.build();
 
-    let scone = Box::leak(Box::new(scone::engine::Engine::new(state)));
-
-    scone.run()
+    scone::engine::start(state)
 }
