@@ -30,7 +30,7 @@ impl saunter::listener::Listener for State {
             scene
                 .world
                 .tick(dt, events)
-                .unwrap_or_else(|err| log::error!("{err}"))
+                .unwrap_or_else(|errors| for error in errors { log::error!("{error}") } );
         } else {
             log::error!("{}", crate::Error::InvalidScene);
         }

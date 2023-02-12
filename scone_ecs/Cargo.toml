@@ -1,6 +1,6 @@
 [package]
 name = "scone-ecs"
-version = "0.1.0"
+version = "0.0.1"
 edition = "2021"
 authors = ["Gavin Niederman <gavinniederman@gmail.com>"]
 description = "The ecs used in Scone"

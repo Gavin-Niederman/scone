@@ -11,12 +11,13 @@ pub struct World<E: Send + Clone> {
 }
 
 impl<E: Send + Clone> World<E> {
-    pub fn tick(&mut self, dt: f32, events: Vec<Event<E>>) -> Result<(), crate::EcsError> {
-        for system in self.systems.iter() {
-            system.tick(&mut self.entities, &mut self.resources, &events, dt)?;
+    pub fn tick(&mut self, dt: f32, events: Vec<Event<E>>) -> Result<(), Vec<crate::EcsError>> {
+        let errors: Vec<crate::EcsError> = self.systems.iter().filter_map(|system| system.tick(&mut self.entities, &mut self.resources, &events, dt).err()).collect();
+        if errors.len() > 0 {
+            Err(errors)
+        } else {
+            Ok(())
         }
-
-        Ok(())
     }
 }
 
