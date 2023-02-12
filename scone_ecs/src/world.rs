@@ -35,7 +35,7 @@ impl<E: Send + Clone> WorldBuilder<E> {
             phantom: PhantomData,
         }
     }
-    
+
     pub fn with_entity(mut self, entity: Entity) -> Self {
         self.entities.push(entity);
         self
@@ -68,7 +68,7 @@ impl<E: Send + Clone> WorldBuilder<E> {
             entities: self.entities,
             resources: self.resources,
             systems: self.systems,
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 }

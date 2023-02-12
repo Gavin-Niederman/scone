@@ -16,6 +16,20 @@ impl Entity {
     }
 
     pub fn get_component<T: Component + 'static + Send + Sync>(
+        &self,
+    ) -> Result<&T, EcsError> {
+        if let Some(component) = self
+            .components
+            .iter()
+            .find_map(|c| c.downcast_ref::<T>())
+        {
+            Ok(component)
+        } else {
+            Err(EcsError::ComponentNotFound(std::any::type_name::<T>()))
+        }
+    }
+
+    pub fn get_component_mut<T: Component + 'static + Send + Sync>(
         &mut self,
     ) -> Result<&mut T, EcsError> {
         if let Some(component) = self

@@ -1,4 +1,6 @@
+pub mod components;
 pub mod engine;
+pub mod renderable;
 pub mod scene;
 pub mod state;
 

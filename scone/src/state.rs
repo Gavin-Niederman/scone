@@ -1,8 +1,20 @@
-use crate::scene::{Scene, Tick};
+use std::time::Instant;
+
+use crate::{renderable::Renderable, scene::Scene};
+use saunter::math::{lerp_instant, lerp};
 
 pub struct State {
     scenes: Vec<Scene>,
     current_scene: usize,
+}
+impl State {
+    pub(crate) fn get_scene(&self) -> Result<&Scene, crate::Error> {
+        if let Some(scene) = self.scenes.get(self.current_scene) {
+            Ok(scene)
+        } else {
+            Err(crate::Error::InvalidScene)
+        }
+    }
 }
 impl saunter::listener::Listener for State {
     type Tick = Tick;
@@ -14,16 +26,24 @@ impl saunter::listener::Listener for State {
         events: Vec<saunter::event::Event<Self::Event>>,
         time: std::time::Instant,
     ) -> Result<Self::Tick, saunter::error::SaunterError> {
-        
         if let Some(scene) = self.scenes.get_mut(self.current_scene) {
-            scene.world.tick(dt, events).unwrap_or_else(|err| log::error!("{err}"))
+            scene
+                .world
+                .tick(dt, events)
+                .unwrap_or_else(|err| log::error!("{err}"))
         } else {
             log::error!("{}", crate::Error::InvalidScene);
         }
 
-        Ok(Tick {
-            time,
-        })
+        if let Ok(scene) = self.get_scene() {
+            Ok(Tick {
+                time,
+                renderables: scene.get_rendereables(),
+            })
+        } else {
+            Err(saunter::error::SaunterError::TickError(saunter::tick::TickError::CouldNotCreateTick))
+        }
+
     }
 }
 
@@ -54,5 +74,33 @@ impl StateBuilder {
             scenes: self.scenes,
             current_scene: self.current_scene.unwrap_or(0),
         }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Tick {
+    pub time: Instant,
+    pub renderables: Vec<Renderable>,
+}
+impl Tick {
+    pub fn first(scene: &Scene) -> Self {
+        Self {
+            time: Instant::now(),
+            renderables: scene.get_rendereables(),
+        }
+    }
+}
+impl saunter::tick::Tick for Tick {
+    fn lerp(a: &Self, b: &Self, t: f32) -> Result<Self, saunter::math::MathError> {
+        let renderables = a.renderables.iter().zip(b.renderables.iter()).map(|renderables| Renderable { test: lerp(renderables.0.test, renderables.1.test, t) }).collect();
+
+        Ok(Self {
+            time: lerp_instant(a.get_time(), b.get_time(), t)?,
+            renderables,
+        })
+    }
+
+    fn get_time(&self) -> &std::time::Instant {
+        &self.time
     }
 }
