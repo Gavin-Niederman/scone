@@ -11,6 +11,22 @@ pub struct World<E: Send + Clone> {
 }
 
 impl<E: Send + Clone> World<E> {
+    pub fn tick(&mut self, dt: f32, events: Vec<Event<E>>) -> Result<(), crate::EcsError> {
+        for system in self.systems.iter() {
+            system.tick(&mut self.entities, &mut self.resources, &events, dt)?;
+        }
+
+        Ok(())
+    }
+}
+
+pub struct WorldBuilder<E: Send + Clone> {
+    pub entities: Vec<Entity>,
+    pub resources: Vec<Resouce<dyn Send + Sync>>,
+    pub systems: Vec<Box<dyn System<E>>>,
+    phantom: PhantomData<E>,
+}
+impl<E: Send + Clone> WorldBuilder<E> {
     pub fn new() -> Self {
         Self {
             entities: Vec::new(),
@@ -19,12 +35,40 @@ impl<E: Send + Clone> World<E> {
             phantom: PhantomData,
         }
     }
+    
+    pub fn with_entity(mut self, entity: Entity) -> Self {
+        self.entities.push(entity);
+        self
+    }
+    pub fn with_entities(mut self, mut entities: Vec<Entity>) -> Self {
+        self.entities.append(&mut entities);
+        self
+    }
 
-    pub fn tick(&mut self, dt: f32, events: Vec<Event<E>>) -> Result<(), crate::EcsError> {
-        for system in self.systems.iter() {
-            system.tick(&mut self.entities, &mut self.resources, &events, dt)?;
+    pub fn with_resource(mut self, resource: Resouce<dyn Send + Sync>) -> Self {
+        self.resources.push(resource);
+        self
+    }
+    pub fn with_resources(mut self, mut resources: Vec<Resouce<dyn Send + Sync>>) -> Self {
+        self.resources.append(&mut resources);
+        self
+    }
+
+    pub fn with_system(mut self, system: Box<dyn System<E>>) -> Self {
+        self.systems.push(system);
+        self
+    }
+    pub fn with_systems(mut self, mut systems: Vec<Box<dyn System<E>>>) -> Self {
+        self.systems.append(&mut systems);
+        self
+    }
+
+    pub fn build(self) -> World<E> {
+        World {
+            entities: self.entities,
+            resources: self.resources,
+            systems: self.systems,
+            phantom: PhantomData
         }
-
-        Ok(())
     }
 }

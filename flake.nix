@@ -13,6 +13,7 @@
           pkgs.cmake
           pkgs.pkg-config
           pkgs.fontconfig
+          pkgs.xorg.libX11
         ];
       };
   };

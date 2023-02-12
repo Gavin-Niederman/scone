@@ -14,8 +14,16 @@ impl saunter::listener::Listener for State {
         events: Vec<saunter::event::Event<Self::Event>>,
         time: std::time::Instant,
     ) -> Result<Self::Tick, saunter::error::SaunterError> {
-        log::info!("ticked");
-        Ok(Tick {})
+        
+        if let Some(scene) = self.scenes.get_mut(self.current_scene) {
+            scene.world.tick(dt, events).unwrap_or_else(|err| log::error!("{err}"))
+        } else {
+            log::error!("{}", crate::Error::InvalidScene);
+        }
+
+        Ok(Tick {
+            time,
+        })
     }
 }
 
