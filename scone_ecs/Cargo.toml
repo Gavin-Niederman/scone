@@ -1,9 +1,10 @@
 [package]
 name = "scone-ecs"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 authors = ["Gavin Niederman <gavinniederman@gmail.com>"]
 description = "The ecs used in Scone"
+readme = "./README.md"
 license = "MIT"
 repository = "https://github.com/Gavin-Niederman/scone"
 keywords = [
