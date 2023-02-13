@@ -1,5 +1,5 @@
-use crate::components::RenderableComponent;
-use crate::{renderable::Renderable, state::State};
+use crate::components::Renderable;
+use crate::state::State;
 use saunter::listener::Listener;
 
 pub struct Scene {
@@ -10,12 +10,12 @@ impl Scene {
         self.world
             .entities
             .iter()
-            .filter(|entity| entity.has_component::<RenderableComponent>())
+            .filter(|entity| entity.has_component::<Renderable>())
             .map(|entity| {
                 entity
-                    .get_component::<RenderableComponent>()
+                    .get_component::<Renderable>()
                     .unwrap()
-                    .renderable
+                    .clone()
             })
             .collect()
     }

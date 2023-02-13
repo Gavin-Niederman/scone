@@ -1,4 +1,4 @@
-use scone::components::RenderableComponent;
+use scone::components::Renderable;
 use scone_ecs::system::System;
 
 use crate::components::{ErrorComponent, ExampleComponent};
@@ -23,8 +23,8 @@ impl System<<scone::state::State as saunter::listener::Listener>::Event> for Exa
                 val = component.val as f32;
             }
 
-            let renderable = entity.get_component_mut::<RenderableComponent>()?;
-            renderable.renderable.test = val;
+            let renderable = entity.get_component_mut::<Renderable>()?;
+            renderable.test = val;
 
             let _ = entity.get_component::<ErrorComponent>()?;
         }

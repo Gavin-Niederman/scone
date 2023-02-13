@@ -8,9 +8,7 @@ use scone_ecs::{entity::Entity, world::WorldBuilder};
 fn main() {
     let mut entity = Entity::new();
     entity.add_component(components::ExampleComponent { val: 1 });
-    entity.add_component(scone::components::RenderableComponent {
-        renderable: scone::renderable::Renderable { test: 0.0 },
-    });
+    entity.add_component(scone::components::Renderable { test: 0.0 });
 
     let world = WorldBuilder::new()
         .with_entity(entity)

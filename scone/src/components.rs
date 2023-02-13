@@ -1,9 +1,7 @@
 use scone_ecs::component::Component;
 
-use crate::renderable::Renderable;
-
-#[derive(Clone, Copy)]
-pub struct RenderableComponent {
-    pub renderable: Renderable,
+#[derive(Clone, Copy, Debug)]
+pub struct Renderable {
+    pub test: f32,
 }
-impl Component for RenderableComponent {}
+impl Component for Renderable {}

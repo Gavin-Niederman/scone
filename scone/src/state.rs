@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use crate::{renderable::Renderable, scene::Scene};
+use crate::{components::Renderable, scene::Scene};
 use saunter::math::{lerp, lerp_instant};
 
 pub struct State {
