@@ -11,12 +11,7 @@ impl Scene {
             .entities
             .iter()
             .filter(|entity| entity.has_component::<Renderable>())
-            .map(|entity| {
-                entity
-                    .get_component::<Renderable>()
-                    .unwrap()
-                    .clone()
-            })
+            .map(|entity| entity.get_component::<Renderable>().unwrap().clone())
             .collect()
     }
 }

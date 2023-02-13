@@ -41,3 +41,33 @@ impl Entity {
         self.components.iter().any(|c| c.is::<T>())
     }
 }
+
+pub struct EntityBuilder {
+    components: Vec<Box<dyn Any + Send + Sync>>,
+}
+impl EntityBuilder {
+    pub fn new() -> Self {
+        Self {
+            components: Vec::new(),
+        }
+    }
+
+    pub fn with_component<T: Component + 'static + Send + Sync>(mut self, component: T) -> Self {
+        self.components.push(Box::new(component));
+        self
+    }
+
+    pub fn with_components<T: Component + 'static + Send + Sync>(
+        mut self,
+        component: Vec<T>,
+    ) -> Self {
+        self.components.push(Box::new(component));
+        self
+    }
+
+    pub fn build(self) -> Entity {
+        Entity {
+            components: self.components,
+        }
+    }
+}
