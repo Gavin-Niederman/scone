@@ -18,7 +18,7 @@ keywords = [
 
 [dependencies]
 saunter = "0.1.7"
-scone-ecs = { version = "0.0.1", path = "../scone_ecs" }
+scone-ecs = { version = "0.0.2", path = "../scone_ecs" }
 log = "0.4.17"
 simplelog = "0.12.0"
 winit = "0.27.5"
