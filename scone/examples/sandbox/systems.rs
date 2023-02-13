@@ -1,7 +1,7 @@
 use scone::components::RenderableComponent;
 use scone_ecs::system::System;
 
-use crate::components::{ExampleComponent, ErrorComponent};
+use crate::components::{ErrorComponent, ExampleComponent};
 
 pub struct ExampleSystem {}
 impl System<<scone::state::State as saunter::listener::Listener>::Event> for ExampleSystem {

@@ -12,7 +12,20 @@ pub struct World<E: Send + Clone> {
 
 impl<E: Send + Clone> World<E> {
     pub fn tick(&mut self, dt: f32, events: Vec<Event<E>>) -> Result<(), Vec<crate::EcsError>> {
-        let errors: Vec<crate::EcsError> = self.systems.iter().filter_map(|system| system.tick(&mut self.entities, &mut self.resources, &events, dt).err()).collect();
+        let errors: Vec<crate::EcsError> = self
+            .systems
+            .iter()
+            .filter_map(|system| {
+                system
+                    .tick(&mut self.entities, &mut self.resources, &events, dt)
+                    .err()
+            })
+            .collect();
+
+        // Sometime doing something like this would be cool.
+        // let errors: Vec<crate::EcsError> = self.systems.par_iter_mut().filter_map(|system| system.tick(&mut self.entities, &mut self.resources, &events, dt).err()).collect();
+        // But you cant mutate self from multiple threads so it's probably not feasable.
+
         if errors.len() > 0 {
             Err(errors)
         } else {

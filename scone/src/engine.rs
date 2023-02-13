@@ -56,8 +56,7 @@ pub fn start(state: State) {
                 0.0,
             );
             if let Ok(lerped) = read_ticks.lerp(mapped_t) {
-                for _renderable in lerped.renderables {
-                }
+                for _renderable in lerped.renderables {}
             }
         }
     })

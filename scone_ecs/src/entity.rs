@@ -15,14 +15,8 @@ impl Entity {
         self.components.push(Box::new(component));
     }
 
-    pub fn get_component<T: Component + 'static + Send + Sync>(
-        &self,
-    ) -> Result<&T, EcsError> {
-        if let Some(component) = self
-            .components
-            .iter()
-            .find_map(|c| c.downcast_ref::<T>())
-        {
+    pub fn get_component<T: Component + 'static + Send + Sync>(&self) -> Result<&T, EcsError> {
+        if let Some(component) = self.components.iter().find_map(|c| c.downcast_ref::<T>()) {
             Ok(component)
         } else {
             Err(EcsError::ComponentNotFound(std::any::type_name::<T>()))

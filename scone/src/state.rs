@@ -1,7 +1,7 @@
 use std::time::Instant;
 
 use crate::{renderable::Renderable, scene::Scene};
-use saunter::math::{lerp_instant, lerp};
+use saunter::math::{lerp, lerp_instant};
 
 pub struct State {
     scenes: Vec<Scene>,
@@ -27,10 +27,11 @@ impl saunter::listener::Listener for State {
         time: std::time::Instant,
     ) -> Result<Self::Tick, saunter::error::SaunterError> {
         if let Some(scene) = self.scenes.get_mut(self.current_scene) {
-            scene
-                .world
-                .tick(dt, events)
-                .unwrap_or_else(|errors| for error in errors { log::error!("{error}") } );
+            scene.world.tick(dt, events).unwrap_or_else(|errors| {
+                for error in errors {
+                    log::error!("{error}")
+                }
+            });
         } else {
             log::error!("{}", crate::Error::InvalidScene);
         }
@@ -41,9 +42,10 @@ impl saunter::listener::Listener for State {
                 renderables: scene.get_rendereables(),
             })
         } else {
-            Err(saunter::error::SaunterError::TickError(saunter::tick::TickError::CouldNotCreateTick))
+            Err(saunter::error::SaunterError::TickError(
+                saunter::tick::TickError::CouldNotCreateTick,
+            ))
         }
-
     }
 }
 
@@ -92,7 +94,14 @@ impl Tick {
 }
 impl saunter::tick::Tick for Tick {
     fn lerp(a: &Self, b: &Self, t: f32) -> Result<Self, saunter::math::MathError> {
-        let renderables = a.renderables.iter().zip(b.renderables.iter()).map(|renderables| Renderable { test: lerp(renderables.0.test, renderables.1.test, t) }).collect();
+        let renderables = a
+            .renderables
+            .iter()
+            .zip(b.renderables.iter())
+            .map(|renderables| Renderable {
+                test: lerp(renderables.0.test, renderables.1.test, t),
+            })
+            .collect();
 
         Ok(Self {
             time: lerp_instant(a.get_time(), b.get_time(), t)?,
