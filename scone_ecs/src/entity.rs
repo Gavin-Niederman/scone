@@ -1,6 +1,7 @@
 use crate::{component::Component, EcsError};
 use std::any::Any;
 
+#[derive(Default)]
 pub struct Entity {
     components: Vec<Box<dyn Any + Send + Sync>>,
 }
@@ -42,6 +43,7 @@ impl Entity {
     }
 }
 
+#[derive(Default)]
 pub struct EntityBuilder {
     components: Vec<Box<dyn Any + Send + Sync>>,
 }

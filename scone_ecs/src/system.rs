@@ -5,7 +5,7 @@ pub trait System<E: Send + Clone + ?Sized>: Send {
         &self,
         entities: &mut Vec<Entity>,
         resources: &mut Vec<Resouce<dyn Send + Sync>>,
-        events: &Vec<saunter::event::Event<E>>,
+        events: &[saunter::event::Event<E>],
         dt: f32,
     ) -> Result<(), crate::EcsError>;
 }

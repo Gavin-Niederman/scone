@@ -1,5 +1,7 @@
 [workspace]
 members = [
     "scone",
-    "scone_ecs"
+    "scone_ecs",
+    "glaze",
 ]
+resolver = "2"

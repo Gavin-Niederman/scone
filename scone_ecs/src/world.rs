@@ -3,6 +3,7 @@ use saunter::event::Event;
 use crate::{entity::Entity, resource::Resouce, system::System};
 use std::marker::PhantomData;
 
+#[derive(Default)]
 pub struct World<E: Send + Clone> {
     pub entities: Vec<Entity>,
     pub resources: Vec<Resouce<dyn Send + Sync>>,
@@ -26,7 +27,7 @@ impl<E: Send + Clone> World<E> {
         // let errors: Vec<crate::EcsError> = self.systems.par_iter_mut().filter_map(|system| system.tick(&mut self.entities, &mut self.resources, &events, dt).err()).collect();
         // But you cant mutate self from multiple threads so it's probably not feasable.
 
-        if errors.len() > 0 {
+        if errors.is_empty() {
             Err(errors)
         } else {
             Ok(())
@@ -34,6 +35,7 @@ impl<E: Send + Clone> World<E> {
     }
 }
 
+#[derive(Default)]
 pub struct WorldBuilder<E: Send + Clone> {
     pub entities: Vec<Entity>,
     pub resources: Vec<Resouce<dyn Send + Sync>>,

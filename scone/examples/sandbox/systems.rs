@@ -9,9 +9,9 @@ impl System<<scone::state::State as saunter::listener::Listener>::Event> for Exa
         &self,
         entities: &mut Vec<scone_ecs::entity::Entity>,
         _resources: &mut Vec<scone_ecs::resource::Resouce<dyn Send + Sync>>,
-        _events: &Vec<
-            saunter::event::Event<<scone::state::State as saunter::listener::Listener>::Event>,
-        >,
+        _events: &[saunter::event::Event<
+            <scone::state::State as saunter::listener::Listener>::Event,
+        >],
         _dt: f32,
     ) -> Result<(), scone_ecs::EcsError> {
         for entity in entities {

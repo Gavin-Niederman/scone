@@ -18,5 +18,5 @@ fn main() {
 
     let state = StateBuilder::new().with_scene(Scene { world }).build();
 
-    scone::start(state)
+    scone::start(state);
 }

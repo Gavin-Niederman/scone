@@ -49,6 +49,7 @@ impl saunter::listener::Listener for State {
     }
 }
 
+#[derive(Default)]
 pub struct StateBuilder {
     scenes: Vec<Scene>,
     current_scene: Option<usize>,
