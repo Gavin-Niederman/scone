@@ -7,7 +7,7 @@ use clap::Parser;
 use crate::state::State;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about, long_about = "This game was written with Scone")]
+#[command(author, version, about, long_about = "This game was written with the Scone game engine")]
 struct Args {
     /// The number of ticks to run per second
     #[arg(short, long, default_value = "66.0")]
