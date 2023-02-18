@@ -66,7 +66,8 @@ impl State {
 
         surface.configure(&device, &config);
 
-        let shader = device.create_shader_module(wgpu::include_wgsl!("../resources/shaders/shader.wgsl"));
+        let shader =
+            device.create_shader_module(wgpu::include_wgsl!("../resources/shaders/shader.wgsl"));
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
@@ -89,16 +90,16 @@ impl State {
                     format: config.format,
                     blend: Some(wgpu::BlendState::REPLACE),
                     write_mask: wgpu::ColorWrites::ALL,
-                })]
+                })],
             }),
             primitive: wgpu::PrimitiveState {
                 topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None, 
+                strip_index_format: None,
                 front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back), 
-                unclipped_depth: false, 
-                polygon_mode: wgpu::PolygonMode::Fill, 
-                conservative: false, 
+                cull_mode: Some(wgpu::Face::Back),
+                unclipped_depth: false,
+                polygon_mode: wgpu::PolygonMode::Fill,
+                conservative: false,
             },
             depth_stencil: None,
             multisample: wgpu::MultisampleState {
@@ -141,11 +142,13 @@ impl State {
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output_texture = self.surface.get_current_texture()?;
-        let view = output_texture.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let view = output_texture
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: None,
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
         let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: None,
@@ -160,13 +163,13 @@ impl State {
                         a: 1.0,
                     }),
                     store: true,
-                }
+                },
             })],
             depth_stencil_attachment: None,
         });
         render_pass.set_pipeline(&self.pipeline);
         render_pass.draw(0..3, 0..1);
-        
+
         drop(render_pass);
 
         self.queue.submit(std::iter::once(encoder.finish()));
