@@ -1,7 +1,12 @@
+use bytemuck::cast_slice;
 use pollster::FutureExt;
+use wgpu::util::DeviceExt;
 use winit::window::Window;
 
-use crate::{Error, InitError, MiscError};
+use crate::{
+    vertex::{ColoredVertex3D, Vertex},
+    Error, InitError, MiscError, pipeline, renderable::Rendereable,
+};
 
 pub struct State {
     window: Window,
@@ -10,8 +15,81 @@ pub struct State {
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
-    pipeline: wgpu::RenderPipeline,
+    pipelines: Vec<wgpu::RenderPipeline>,
+    vertex_buffer: wgpu::Buffer,
+    index_buffer: wgpu::Buffer,
+
+    renderable_queue: Vec<Box<dyn Rendereable<Vertex = dyn Vertex>>>
 }
+
+const TEST_VERTS: &[ColoredVertex3D] = &[
+    ColoredVertex3D {
+        position: [-0.0868241, 0.49240386, 0.0],
+        color: [0.5, 0.0, 0.5],
+    },
+    ColoredVertex3D {
+        position: [-0.49513406, 0.06958647, 0.0],
+        color: [0.5, 0.0, 0.5],
+    },
+    ColoredVertex3D {
+        position: [-0.21918549, -0.44939706, 0.0],
+        color: [0.5, 0.0, 0.5],
+    },
+    ColoredVertex3D {
+        position: [0.35966998, -0.3473291, 0.0],
+        color: [0.5, 0.0, 0.5],
+    },
+    ColoredVertex3D {
+        position: [0.44147372, 0.2347359, 0.0],
+        color: [0.5, 0.0, 0.5],
+    },
+];
+
+const TEST_INDICES: &[u16] = &[0, 1, 4, 1, 2, 4, 2, 3, 4];
+
+pub struct VertexColorRenderableTest<'a> {
+    verts: &'a [ColoredVertex3D],
+    indices: &'a [u16],
+}
+impl<'a> Rendereable for VertexColorRenderableTest<'a> {
+    type Vertex = ColoredVertex3D;
+
+    fn get_vertices(&self) -> &[Self::Vertex] {
+        self.verts
+    }
+    fn get_indices(&self) -> &[u32] {
+        cast_slice(self.indices)
+    }
+    fn get_shadertype() -> crate::shader::ShaderType {
+        crate::shader::ShaderType::VertexColor
+    }
+}
+
+const VERTEX_COLOR_TEST: VertexColorRenderableTest = VertexColorRenderableTest {
+    verts: &[
+        ColoredVertex3D {
+            position: [-0.0868241, 0.49240386, 0.0],
+            color: [0.5, 0.0, 0.5],
+        },
+        ColoredVertex3D {
+            position: [-0.49513406, 0.06958647, 0.0],
+            color: [0.5, 0.0, 0.5],
+        },
+        ColoredVertex3D {
+            position: [-0.21918549, -0.44939706, 0.0],
+            color: [0.5, 0.0, 0.5],
+        },
+        ColoredVertex3D {
+            position: [0.35966998, -0.3473291, 0.0],
+            color: [0.5, 0.0, 0.5],
+        },
+        ColoredVertex3D {
+            position: [0.44147372, 0.2347359, 0.0],
+            color: [0.5, 0.0, 0.5],
+        },
+    ],
+    indices: &[0, 1, 4, 1, 2, 4, 2, 3, 4],
+};
 
 impl State {
     pub fn new(window: Window) -> Result<Self, Error> {
@@ -66,8 +144,9 @@ impl State {
 
         surface.configure(&device, &config);
 
-        let shader =
-            device.create_shader_module(wgpu::include_wgsl!("../resources/shaders/shader.wgsl"));
+        let shader = device.create_shader_module(wgpu::include_wgsl!(
+            "../resources/shaders/vertex_color.wgsl"
+        ));
 
         let pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
             label: None,
@@ -75,40 +154,21 @@ impl State {
             push_constant_ranges: &[],
         });
 
-        let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+        let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: None,
-            layout: Some(&pipeline_layout),
-            vertex: wgpu::VertexState {
-                module: &shader,
-                entry_point: "vs_main",
-                buffers: &[],
-            },
-            fragment: Some(wgpu::FragmentState {
-                module: &shader,
-                entry_point: "fs_main",
-                targets: &[Some(wgpu::ColorTargetState {
-                    format: config.format,
-                    blend: Some(wgpu::BlendState::REPLACE),
-                    write_mask: wgpu::ColorWrites::ALL,
-                })],
-            }),
-            primitive: wgpu::PrimitiveState {
-                topology: wgpu::PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-                front_face: wgpu::FrontFace::Ccw,
-                cull_mode: Some(wgpu::Face::Back),
-                unclipped_depth: false,
-                polygon_mode: wgpu::PolygonMode::Fill,
-                conservative: false,
-            },
-            depth_stencil: None,
-            multisample: wgpu::MultisampleState {
-                count: 1,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
-            multiview: None,
+            usage: wgpu::BufferUsages::VERTEX,
+            contents: bytemuck::cast_slice(TEST_VERTS),
         });
+
+        let index_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
+            label: None,
+            usage: wgpu::BufferUsages::INDEX,
+            contents: cast_slice(TEST_INDICES),
+        });
+
+        let pipelines = vec![
+            pipeline::create_pipeline(&device, &shader, &config.format, &[ColoredVertex3D::layout()], Some(&pipeline_layout)),
+        ];
 
         Ok(Self {
             window,
@@ -117,7 +177,9 @@ impl State {
             device,
             queue,
             config,
-            pipeline,
+            pipelines,
+            vertex_buffer,
+            index_buffer,
         })
     }
 
@@ -168,7 +230,9 @@ impl State {
             depth_stencil_attachment: None,
         });
         render_pass.set_pipeline(&self.pipeline);
-        render_pass.draw(0..3, 0..1);
+        render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+        render_pass.set_index_buffer(self.index_buffer.slice(..), wgpu::IndexFormat::Uint16);
+        render_pass.draw_indexed(0..TEST_INDICES.len() as u32, 0, 0..1);
 
         drop(render_pass);
 

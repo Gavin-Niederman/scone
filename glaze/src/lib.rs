@@ -1,4 +1,8 @@
+pub mod pipeline;
+pub mod renderable;
+pub mod shader;
 pub mod state;
+pub mod vertex;
 
 pub use state::State;
 

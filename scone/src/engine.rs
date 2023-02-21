@@ -3,28 +3,12 @@ use std::{
     thread,
 };
 
+use crate::args::Args;
 use clap::Parser;
 use saunter::{listener::Listener, tick::Ticks};
 use winit::event::{Event, WindowEvent};
 
 use crate::state::{State, Tick};
-
-#[derive(Parser, Debug)]
-#[command(
-    author,
-    version,
-    about,
-    long_about = "This game was written with the Scone game engine"
-)]
-struct Args {
-    /// The number of ticks to run per second
-    #[arg(short, long, default_value_t = 66.0)]
-    tps: f32,
-
-    /// The log level for the logger to use
-    #[arg(short, long, default_value_t = log::LevelFilter::Warn)]
-    log_level: log::LevelFilter,
-}
 
 pub fn start(state: State) {
     let args = Args::parse();
@@ -119,7 +103,7 @@ fn init_logger(level: log::LevelFilter) -> Result<(), fern::InitError> {
     let colors = fern::colors::ColoredLevelConfig::new()
         .trace(fern::colors::Color::Cyan)
         .debug(fern::colors::Color::Blue)
-        .info(fern::colors::Color::Green)
+        .info(fern::colors::Color::BrightGreen)
         .warn(fern::colors::Color::BrightYellow)
         .error(fern::colors::Color::Red);
 

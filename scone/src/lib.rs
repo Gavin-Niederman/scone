@@ -1,3 +1,4 @@
+pub(crate) mod args;
 pub mod components;
 pub mod engine;
 pub mod scene;
