@@ -9,11 +9,12 @@
       let
         pkgs = nixpkgs.legacyPackages.x86_64-linux; 
       in pkgs.mkShell {
-        buildInputs = [
-          pkgs.cmake
-          pkgs.pkg-config
-          pkgs.fontconfig
-          pkgs.xorg.libX11
+        buildInputs = with pkgs; [
+          pkgconfig
+          xorg.libX11
+          xorg.libXcursor
+          xorg.libXrandr
+          xorg.libXi
         ];
       };
   };

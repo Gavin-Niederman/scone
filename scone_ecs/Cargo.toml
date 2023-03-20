@@ -4,7 +4,6 @@ version = "0.0.2"
 edition = "2021"
 authors = ["Gavin Niederman <gavinniederman@gmail.com>"]
 description = "The ecs used in Scone"
-readme = "../README.md"
 license = "MIT"
 repository = "https://github.com/Gavin-Niederman/scone"
 keywords = [
@@ -17,5 +16,5 @@ keywords = [
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.27.5"
+winit = "0.28.3"
 saunter = "0.2.0"

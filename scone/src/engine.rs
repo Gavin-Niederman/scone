@@ -23,10 +23,12 @@ pub fn start(state: State) {
         .build(&event_loop)
         .unwrap();
 
-    let mut renderer = glaze::State::new(window).unwrap();
+    let mut renderer = glaze::State::new(window);
 
     event_loop.run(move |event, _, control_flow| {
         control_flow.set_poll();
+
+        renderer.handle_event(&event);
 
         match event {
             Event::WindowEvent { ref event, .. } => match event {
@@ -35,14 +37,9 @@ pub fn start(state: State) {
                     event_sender.send(saunter::event::Event::Close).unwrap();
                     control_flow.set_exit();
                 }
-                WindowEvent::Resized(new_size) => {
-                    renderer
-                        .resize(*new_size)
-                        .unwrap_or_else(|err| log::error!("{err}"));
-                }
                 _ => {}
             },
-            Event::RedrawRequested(window_id) if window_id == renderer.window().id() => {
+            Event::RedrawRequested(window_id) if window_id == renderer.get_window().id() => {
                 if let Some(static_event) = event.to_static() {
                     event_sender
                         .send(saunter::event::Event::Other(static_event))
@@ -62,15 +59,6 @@ pub fn start(state: State) {
                             // Do something with the renderer here
                         }
                     }
-                }
-
-                renderer.update();
-
-                match renderer.render() {
-                    Err(wgpu::SurfaceError::Lost) => renderer.reconfigure(),
-                    Err(wgpu::SurfaceError::OutOfMemory) => control_flow.set_exit(),
-                    Err(err) => log::error!("{err}"),
-                    _ => {}
                 }
             }
             _ => (),
