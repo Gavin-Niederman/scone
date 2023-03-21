@@ -38,7 +38,7 @@ impl State {
         let surface_config = wgpu::SurfaceConfiguration {
             alpha_mode: surface_capabilities.alpha_modes[0],
             format: surface_texture_format,
-            present_mode: wgpu::PresentMode::AutoVsync,
+            present_mode: wgpu::PresentMode::AutoNoVsync,
             width: size.width,
             height: size.height,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -76,8 +76,15 @@ impl State {
             },
             _ => {}
         }
-        // log::warn!("redrawing");
-        self.render().unwrap_or_else(|err| println!("{err}"));
+        match self.render() {
+            Err(wgpu::SurfaceError::Lost) => {
+                self.renderer.reconfigure();
+            },
+            Err(err) => {
+                log::error!("{err}");
+            },
+            Ok(_) => {}
+        }
     }
 
     fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
@@ -85,7 +92,10 @@ impl State {
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        self.renderer.render()
+        self.renderer.render()?;
+        log::info!("drew frame");
+
+        Ok(())
     }
 }
 

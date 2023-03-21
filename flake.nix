@@ -16,6 +16,7 @@
           xorg.libXrandr
           xorg.libXi
           wayland
+          cargo-flamegraph
         ];
       };
   };
