@@ -1,3 +1,5 @@
+#![feature(test)]
+
 pub mod renderer;
 pub mod state;
 

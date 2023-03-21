@@ -6,9 +6,6 @@ use crate::renderer::Renderer;
 pub struct State {
     renderer: Renderer,
     window: winit::window::Window,
-    size: winit::dpi::PhysicalSize<u32>,
-    surface: wgpu::Surface,
-    surface_config: wgpu::SurfaceConfiguration,
 }
 
 impl State {
@@ -41,7 +38,7 @@ impl State {
         let surface_config = wgpu::SurfaceConfiguration {
             alpha_mode: surface_capabilities.alpha_modes[0],
             format: surface_texture_format,
-            present_mode: wgpu::PresentMode::Fifo,
+            present_mode: wgpu::PresentMode::AutoVsync,
             width: size.width,
             height: size.height,
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
@@ -62,15 +59,9 @@ impl State {
 
         surface.configure(&device, &surface_config);
 
-        let renderer = Renderer::new(device, queue, adapter);
+        let renderer = Renderer::new(device, queue, adapter, size, surface, surface_config);
 
-        Self {
-            renderer,
-            window,
-            size,
-            surface,
-            surface_config,
-        }
+        Self { renderer, window }
     }
 
     pub fn get_window(&self) -> &winit::window::Window {
@@ -83,29 +74,34 @@ impl State {
                 winit::event::WindowEvent::Resized(new_size) => self.resize(*new_size),
                 _ => {}
             },
-            Event::RedrawRequested(id) => {
-                if self.window.id() == *id {
-                    self.render().unwrap_or_else(|err| println!("{err}"));
-                }
-            }
             _ => {}
         }
+        // log::warn!("redrawing");
+        self.render().unwrap_or_else(|err| println!("{err}"));
     }
 
     fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
-        if new_size.width > 0 && new_size.height > 0 {
-            self.size = new_size;
-            self.surface_config.width = new_size.width;
-            self.surface_config.height = new_size.height;
-            self.surface
-                .configure(&self.renderer.device, &self.surface_config);
-        }
+        self.renderer.resize(new_size);
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        let output_texture = self.surface.get_current_texture()?;
-        self.renderer.render(output_texture);
+        self.renderer.render()
+    }
+}
 
-        Ok(())
+#[cfg(test)]
+mod bench {
+    extern crate test;
+    use test::Bencher;
+
+    #[bench]
+    fn render(bencher: &mut Bencher) {
+        use crate::State;
+        let event_loop = winit::event_loop::EventLoop::new();
+        let window = winit::window::Window::new(&event_loop).unwrap();
+        let mut renderer = State::new(window);
+        bencher.iter(|| {
+            renderer.render().unwrap();
+        });
     }
 }

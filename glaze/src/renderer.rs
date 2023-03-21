@@ -1,20 +1,45 @@
-pub struct Renderer {
+pub(crate) struct Renderer {
     pub(crate) device: wgpu::Device,
     queue: wgpu::Queue,
     adapter: wgpu::Adapter,
+    size: winit::dpi::PhysicalSize<u32>,
+    surface: wgpu::Surface,
+    surface_config: wgpu::SurfaceConfiguration,
 }
 
 impl Renderer {
-    pub fn new(device: wgpu::Device, queue: wgpu::Queue, adapter: wgpu::Adapter) -> Self {
+    pub fn new(
+        device: wgpu::Device,
+        queue: wgpu::Queue,
+        adapter: wgpu::Adapter,
+        size: winit::dpi::PhysicalSize<u32>,
+        surface: wgpu::Surface,
+        surface_config: wgpu::SurfaceConfiguration,
+    ) -> Self {
         Self {
             device,
             queue,
             adapter,
+            size,
+            surface,
+            surface_config,
         }
     }
 
-    pub fn render(&mut self, texture: wgpu::SurfaceTexture) {
-        let view = texture
+    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        if new_size.width > 0 && new_size.height > 0 {
+            self.size = new_size;
+            self.surface_config.width = new_size.width;
+            self.surface_config.height = new_size.height;
+            self.surface
+                .configure(&self.device, &self.surface_config);
+        }
+    }
+
+    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+        let output_texture = self.surface.get_current_texture()?;
+
+        let view = output_texture
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
 
@@ -43,6 +68,8 @@ impl Renderer {
         drop(render_pass);
 
         self.queue.submit(std::iter::once(encoder.finish()));
-        texture.present();
+        output_texture.present();
+
+        Ok(())
     }
 }
