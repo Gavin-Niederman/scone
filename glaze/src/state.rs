@@ -1,11 +1,15 @@
 use pollster::FutureExt;
+use wgpu::include_wgsl;
 use winit::event::Event;
+use crate::renderable::Renderable;
 
 use crate::renderer::Renderer;
 
-pub struct State {
+pub struct State{
     renderer: Renderer,
     window: winit::window::Window,
+
+    test_renderable: Renderable<'static>,
 }
 
 impl State {
@@ -59,9 +63,53 @@ impl State {
 
         surface.configure(&device, &surface_config);
 
-        let renderer = Renderer::new(device, queue, adapter, size, surface, surface_config);
+        let shader = device.create_shader_module(include_wgsl!("../resources/shaders/colored.wgsl"));
+        
+        let render_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: None,
+            bind_group_layouts: &[],
+            push_constant_ranges: &[],
+        });
+        
+        let render_pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
+            label: None,
+            layout: Some(&render_pipeline_layout),
+            depth_stencil: None,
+            vertex: wgpu::VertexState {
+                module: &shader,
+                entry_point: "vs_main",
+                buffers: &[]
+            },
+            fragment: Some(wgpu::FragmentState {
+                module: &shader,
+                entry_point: "fs_main",
+                targets: &[Some(wgpu::ColorTargetState {
+                    format: surface_texture_format,
+                    blend: Some(wgpu::BlendState::REPLACE),
+                    write_mask: wgpu::ColorWrites::ALL,
+                })]
+            }),
+            primitive: wgpu::PrimitiveState {
+                topology: wgpu::PrimitiveTopology::TriangleList,
+                cull_mode: Some(wgpu::Face::Back),
+                front_face: wgpu::FrontFace::Ccw,
+                polygon_mode: wgpu::PolygonMode::Fill,
+                unclipped_depth: false,
+                conservative: false,
+                strip_index_format: None,
+            },
+            multisample: wgpu::MultisampleState { count: 1, mask: !0, alpha_to_coverage_enabled: false },
+            multiview: None,
+        });
 
-        Self { renderer, window }
+        let renderer = Renderer::new(device, queue, adapter, size, surface, surface_config, render_pipeline);
+
+        let test_renderable = Renderable {
+            indicese: &[],
+            shader,
+        };
+
+        Self { renderer, window, test_renderable }
     }
 
     pub fn get_window(&self) -> &winit::window::Window {
@@ -80,6 +128,7 @@ impl State {
             Err(wgpu::SurfaceError::Lost) => {
                 self.renderer.reconfigure();
             },
+            Err(wgpu::SurfaceError::Outdated) => {},
             Err(err) => {
                 log::error!("{err}");
             },
@@ -92,8 +141,9 @@ impl State {
     }
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
-        self.renderer.render()?;
-        log::info!("drew frame");
+        self.renderer.render(
+            vec![&self.test_renderable]
+        )?;
 
         Ok(())
     }

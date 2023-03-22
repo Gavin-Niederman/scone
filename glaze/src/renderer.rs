@@ -1,3 +1,5 @@
+use crate::renderable::Renderable;
+
 pub(crate) struct Renderer {
     pub(crate) device: wgpu::Device,
     queue: wgpu::Queue,
@@ -5,6 +7,7 @@ pub(crate) struct Renderer {
     size: winit::dpi::PhysicalSize<u32>,
     surface: wgpu::Surface,
     surface_config: wgpu::SurfaceConfiguration,
+    render_pipeline: wgpu::RenderPipeline,
 }
 
 impl Renderer {
@@ -15,6 +18,7 @@ impl Renderer {
         size: winit::dpi::PhysicalSize<u32>,
         surface: wgpu::Surface,
         surface_config: wgpu::SurfaceConfiguration,
+        render_pipeline: wgpu::RenderPipeline,
     ) -> Self {
         Self {
             device,
@@ -23,6 +27,7 @@ impl Renderer {
             size,
             surface,
             surface_config,
+            render_pipeline,
         }
     }
 
@@ -40,7 +45,7 @@ impl Renderer {
         self.surface.configure(&self.device, &self.surface_config)
     }
 
-    pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
+    pub fn render(&mut self, renderables: Vec<&Renderable>) -> Result<(), wgpu::SurfaceError> {
         let output_texture = self.surface.get_current_texture()?;
 
         let view = output_texture
@@ -51,7 +56,7 @@ impl Renderer {
             .device
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
 
-        let render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+        let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
             label: None,
             color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                 view: &view,
@@ -68,6 +73,9 @@ impl Renderer {
             })],
             depth_stencil_attachment: None,
         });
+
+        render_pass.set_pipeline(&mut self.render_pipeline);
+        render_pass.draw(0..3, 0..1);
 
         drop(render_pass);
 
